@@ -23,9 +23,7 @@ Existem duas características principais que distinguem o DuckDB de outras ferra
 
 Outra vantagem do DuckDB é a sua capacidade de compressão de dados. Ele utiliza algoritmos de compressão especializados, resultando em economia de espaço em disco e também contribuindo com uma maior velocidade na consulta.
 
-O DuckDB possui uma enorme quantidade de APIs de outras linguagens que poderão interagir com o banco
-
-
+Existem várias APIs de outras linguagens que poderão interagir com o DuckDB.
 
 # Objetivo
 
