@@ -8,166 +8,274 @@ authors:
     address: CIO, International Business Machines Corporation
     email: thop100@hotmail.com
 abstract: |
-  Muitos já tiveram o problema, principalmente relacionado a memória da computador, quando tentam ler e manipular uma base de dados muito grande. Existem várias soluções para lidar com grandes bases de dados, mas uma tem chamado bastante atenção atualmente: DuckDB Duckdb é um banco de dados simples de operar, por ser um banco de dados embarcado/embutido no estilo SQLIte. Contudo, diferentemente do SQLite, o duckdb tem suporte para mais de 20 tipos de variáveis. E alguns destes tipos são aninhados como lista, estrutura e *map*. Pode se fazer consultas em arquivos csv e parquet diretamente. Consultas até em arquivos online salvos em um serviço de armazenamento na núvem (e.g. S3). Tem suporte também para consultas em arquivo json. Além de toda sintaxe padrão do SQL, ele tem algumas funções adicionais e suporta até a sintaxe de list comprehention do python. Este capĩtulo irá apresentar um pouco dos recursos do duckdb e sua interação com a linguagem R.
+  Muitos já tiveram o problema, principalmente relacionado a memória da computador, quando tentam ler e manipular uma base de dados muito grande. Existem várias soluções para lidar com grandes bases de dados, mas uma tem chamado bastante atenção atualmente: `duckdb`. O `duckdb` é um banco de dados simples de operar, por ser um banco de dados embarcado/embutido no estilo SQLIte. Contudo, diferentemente do SQLite, o `duckdb` tem suporte para mais de 20 tipos de variáveis. E alguns destes tipos são aninhados como lista, estrutura e *map*. Pode se fazer consultas em arquivos csv e parquet diretamente. Consultas até em arquivos online salvos em um serviço de armazenamento na núvem (e.g. S3). Tem suporte também para consultas em arquivo json. Além de toda sintaxe padrão do SQL, ele tem algumas funções adicionais e suporta até a sintaxe de list comprehention do python. Este capĩtulo irá apresentar alguns recursos do `duckdb` e sua interação com a linguagem R.
   
   Palavras Chave: duckdb; SQL; R; banco de dados.
-bibliography: References.bib
 format: pdf
 ---
 
 # Introdução
 
-DuckDB é um sistema de gerenciamento de banco de dados (SGBD) de código aberto (i.e. MIT), escrito em C++ e otimizado para consultas analíticas. Ele foi projetado para fornecer alta velocidade e eficiência em consultas complexas em grandes conjuntos de dados. 
+O `duckdb` é um sistema de gerenciamento de banco de dados (SGBD) de código aberto (i.e. MIT), escrito em C++ e otimizado para consultas analíticas. Ele foi projetado para fornecer alta velocidade e eficiência em consultas complexas em grandes conjuntos de dados. 
 
-Existem duas características principais que distinguem o DuckDB de outras ferramentas de análise de dados: a arquitetura colunar e o processamento vetorizado. A arquitetura colunar permite armazenar dados em colunas separadas, otimizando o acesso aos dados necessários para consultas específicas. Já o processamento vetorizado realiza operações em lotes, aproveitando as otimizações de hardware e reduzindo a latência de acesso à memória. Com isso se produz consultas mais rápidas e eficiêntes.
+Existem duas características principais que distinguem o `duckdb` de outras ferramentas de análise de dados: a arquitetura colunar e o processamento vetorizado. A arquitetura colunar permite armazenar dados em colunas separadas, otimizando o acesso aos dados necessários para consultas específicas. Já o processamento vetorizado realiza operações em lotes, aproveitando as otimizações de hardware e reduzindo a latência de acesso à memória. Com isso se produz consultas mais rápidas e eficiêntes.
 
-Outra vantagem do DuckDB é a sua capacidade de compressão de dados. Ele utiliza algoritmos de compressão especializados, resultando em economia de espaço em disco e também contribuindo com uma maior velocidade na consulta.
+Outra vantagem do `duckdb` é a sua capacidade de compressão de dados. Ele utiliza algoritmos de compressão especializados, resultando em economia de espaço em disco e também contribuindo com uma maior velocidade na consulta.
 
-Existem várias APIs de outras linguagens que poderão interagir com o DuckDB.
+Existem várias *API wrappers* em outras linguagens além de C++ que poderão interagir com o `duckdb`. Além disso, é possível rodar o `duckdb` no próprio *browser* utilizando uma versão compilada em Web Assembly.
 
-# Objetivo
+# Simplicidade
 
-Nesta seção deverão ser apresentados os objetivos do estudo/palestra.
-
-# Aplicação
-
-Nesta seção deverão ser especificados os procedimentos, o contexto e a aplicação realizada.
-
-# Resultados e Discussão
-
-Deverá apresentar uma síntese dos resultados encontrados, podendo incluir tabela e/ou figura. Nesta seção devem ser incluídos comentários sobre os resultados e comparação dos achados do estudo com os de outras publicações.
-
-As tabelas e figuras (Entende-se por figuras: gráficos, mapas, fotografias, etc.) devem ser numeradas sequencialmente em algarismos arábicos. Cada tabela e figura, além da numeração, deve possuir um título autoexplicativo apropriado, colocado centralizado, acima da tabela e abaixo da figura. Tanto a tabela quanto a figura deverão ter a especificação da **FONTE**, posicionada na parte inferior, conforme ilustrado neste template.
-
-## Figuras
-
-Figuras devem ser centralizadas, conforme ilustrado na @fig-Figura1. Toda figura deve apresentar os elementos mínimos conforme apresentado neste modelo. A @fig-Figura1 ilustra a formatação requerida.
-
-Todas as figuras devem trazer a respectiva fonte. A @fig-Figura1 rornece um exemplo padrão para a formatação da fonte.
-
-![Logo do Seminário Internacional de Estatística com R - SER. Fonte: \@NomeDaReferencia.](Figura1.png){#fig-Figura1 width="37.5%" fig-align="center" fig.cap="center"}
-
-Caso a figura ou tabela seja de própria autoria, então utilizar *Fonte: Os autores.* conforme mostrado na @fig-Figura2, a seguir:
-
-![Logo do Seminário Internacional de Estatística com R - SER. Fonte: Os autores.](Figura1.png){#fig-Figura2 width="37.5%" fig-align="center" fig.cap="center"}
-
-Figuras construídas com o RPosit utilizando o *quarto* podem ser formatadas e referenciadas conforme o modelo a seguir.
+Para usar o `duckdb` no R é bastante fácil, tendo uma instação bem simples como vemos à seguir: 
 
 ```{r}
-#| label: Figura3
-#| echo: false
-#| warning: FALSE
-#| message: FALSE
-#| fig-cap: "Exemplo de figura produzida diretamente com R. Fonte: @hadley."
-#| fig-alt: "Disponível em https://quarto.org/docs/get-started/computations/rstudio.html."
-#| fig-width: 5
-#| fig-height: 2.75
-if(!require(ggplot2)){install.packages("ggplot2")}
-p=ggplot(mpg, aes(x = hwy, y = cty, color = cyl)) +
-  geom_point(alpha = 0.5, size = 2) +
-  scale_color_viridis_c() +
-  theme_minimal()
-p
-ggsave("Figura3.png",plot = p,width = 5, height =2.75, dpi = 300,units="in")
-
-```
-
-Note que o código também salva a respectiva figura em formato *.png*, nomeando de acordo com a ordem em que a figura aparece no texto, ou seja, esta é a terceira figura do texto e pode ser referenciada por meio do comando \@fig-Figura3.
-
-Os códigos podem ser inseridos no texto conforme o seguinte exemplo:
-
-```{r}
-#| label: Code01
-#| echo: true
+#| label: setup
 #| eval: false
-if(!require(ggplot2)){install.packages("ggplot2")}
-ggplot(mpg, aes(x = hwy, y = cty, color = cyl)) +
-  geom_point(alpha = 0.5, size = 2) +
-  scale_color_viridis_c() +
-  theme_minimal()
+ 
+install.packages("duckdb")
 ```
 
-Neste caso, o código não é avaliado para gerar resultados.
-
-## Tabelas
-
-Aqui estão algumas orientações para inserção de tabelas. Sugerimos utilizar pacotes disponíveis no CRAN para formatação das tabelas-prefira formatações simples. Sugerimos o pacote *gt* para geração das tabelas devido possibilidade de inserir os elementos essenciais. A @tbl-tab01 é um exemplo de tabela de dados com *caption* e fonte.
+Caso necessite de uma versão em desenvolvimento do pacote, a instação poderá ser feita indicando o repositório do `duckdb`:
 
 ```{r}
-#| label: tbl-tab01
-#| tbl-cap: Tabela de Dados
-#| echo: false
-library("gt")
-# Create a display table based on `iris`
-iris_tbl <- gt(head(iris)) %>%
-  tab_spanner_delim(delim = ".") %>%
-  cols_move_to_start(columns = Species) %>%
-  fmt_number(
-    columns = c(Sepal.Length, Sepal.Width, Petal.Length, Petal.Width),
-    decimals = 1
-  ) %>%
-  #tab_header(
-  #  title = md("Título, se necessário"),
-  #  subtitle = md("[subtítulo, se necessário]")
-  #) %>%
-  #tab_header(
-  #  title = md("Table 1: Example table")
-  #) %>%
-  tab_source_note(
-    source_note = md("Fonte: NOME (ANO).")
-  )
+#| label: setup-dev
+#| eval: false
 
-iris_tbl
-
-
+install.packages('duckdb', repos=c('https://duckdb.r-universe.dev',
+  'https://cloud.r-project.org'))
 ```
 
-## Exemplos de arquivos .bib {#sec-exemplo}
+A versão estável utilizada neste capítulo foi a `r packageVersion("duckdb")`.
 
-Os arquivos *.bib* devem estar preenchidos com os elementos disponíveis de acordo com a normatização ABNT vigente. Exemplos de entradas *.bib* podem ser encontradas no arquivo *References.bib*.
+# Velocidade
 
--   Entrada *.bib* para um livro (@hadley):
+Nesta seção, vamos investigar a impressionante velocidade do `duckdb` na análise de dados. Para ilustrar esse desempenho, faremos uso de um conjunto de dados que registra a duração de viagens de táxi na cidade de Nova York. Esses dados foram obtidos a partir da plataforma Kaggle e estão disponíveis no formato CSV através do link <https://www.kaggle.com/competitions/nyc-taxi-trip-duration/data>. O conjunto de dados compreende cerca de 1.5 milhões de registros de viagens com o arquivo tendo o tamanho de 191Mb.
 
-```{verbatim}
-@Book{hadley,
-    author = {Hadley Wickham},
-    title = {ggplot2: Elegant Graphics for Data Analysis},
-    publisher = {Springer-Verlag New York},
-    year = {2016},
-    isbn = {978-3-319-24277-4},
-    url = {https://ggplot2.tidyverse.org},
-  }
+Utilizando apenas o `r-base` e o pacote `dplyr` o tempo foi de aproximandamente 22 seg.
+
+```{r}
+#| label: speed-r-base
+#| eval: false
+
+system.time({
+  read.csv("../data/nyc-taxi-trip-duration/train.csv") |>
+    dplyr::mutate(month = lubridate::month(dropoff_datetime)) |>
+    dplyr::group_by(month) |>
+    dplyr::summarise(`Média (s)` = mean(trip_duration, na.rm = TRUE))
+})
 ```
 
--   Entrada *.bib* para um manual (@rcore):
+```
+usuário   sistema decorrido 
+ 14.323     6.096    21.711 
+```
 
-```{verbatim}
+Contudo, utilizando o `duckdb` o tempo de execução da leitura dados e consulta foi um pouco maior do que 2 seg.
+
+```{r}
+#| label: speed-duckdb
+#| eval: false
+
+system.time({
+  con <- duckdb::dbConnect(duckdb::duckdb(), "../data/nyc-taxi.duckdb")
+  duckdb::duckdb_read_csv(con, 
+    "nyc-taxi", "../data/nyc-taxi-trip-duration/train.csv")
+  dplyr::tbl(con, "nyc-taxi") |> 
+  dplyr::mutate(month = dplyr::sql("datepart('month', 
+    strptime(dropoff_datetime, '%Y-%m-%d %H:%M:%S'))")) |>
+  dplyr::group_by(month) |>
+  dplyr::summarise(`Média (s)` = mean(trip_duration, na.rm = TRUE))
+  duckdb::dbDisconnect(con, shutdown = TRUE)
+})
+```
+
+```
+usuário   sistema decorrido 
+  2.024     0.145     2.331
+```
+
+O resultado é a média de duração de viagens por mês:
+
+```
+# Source:   SQL [7 x 2]
+# Database: DuckDB 0.7.1 [root@Darwin 22.6.0:R 4.3.0/../data/nyc-taxi.duckdb]
+  month `Média (s)`
+  <dbl>       <dbl>
+1     3        958.
+2     1        918.
+3     4        963.
+4     5       1001.
+5     6       1012.
+6     2        898.
+7     7       9484.
+```
+
+# Recursos
+
+## Tipos de dados
+
+No `duckdb` há mais de 20 tipos de dados suportados. A lista completa pode ser consultada neste link <https://duckdb.org/docs/sql/data_types/overview>. A seguir pode ser observado alguns dados que foram salvos em alguns tipos no `duckdb` e como os tipos foram preservados ao se fazer a consulta na tabela `dplyr::tbl(con, "examples")`. Uma observação interessante é do tipo `factor` no R, e como ele persiste na tabela do `duckdb` como `enum`.
+
+```{r}
+#| label: data-types
+
+con <- 
+  duckdb::dbConnect(duckdb::duckdb(), ":memory:")
+
+dplyr::tibble(
+  boolean = c(TRUE, TRUE, FALSE, TRUE),
+  double = c(-1.2, 5.65, 0.91, 100),
+  integer = c(3L, 20L, 0L, -2L),
+  timestamp = c("2023-04-01 12:13", "2023-05-30 01:45", 
+    "2023-06-07 13:01", "2023-09-23 23:02") |> 
+    lubridate::ymd_hm(),
+    varchar = LETTERS[5:8],
+    enum = factor(c("Y", "Y", "N", "Y"), levels = c("N", "Y"))
+  ) |>
+  duckdb::dbWriteTable(con, "examples", value = _, overwrite = TRUE)
   
-@Manual{rcore,
-     title = {R: A Language and Environment for Statistical Computing},
-     author = {{R CORE TEAM}},
-     organization = {R Foundation for Statistical Computing},
-     address = {Vienna, Austria},
-     year = {2021},
-     url = {https://www.R-project.org/},
-     }
+dplyr::tbl(con, "examples")
+duckdb::dbDisconnect(con, shutdown = TRUE)
 ```
 
--   Entrada *.bib* para um manual (@fernando):
+## Tipos de dados aninhados
 
-```{verbatim}
-  
-@Internet{fernando,
-   author={F. G. PILOTTO},
-   title={Estilo BibTeX com as Normas da ABNT},
-   url={http://www.if.ufrgs.br/hadrons/abnt/abntdoc.tex},
-   note={Acessado em: 11 abr. 2003 },
-   internetaddress={http://www.if.ufrgs.br/hadrons/abnt/abntdoc.tex},
-   day=11,
-   month=abr,
-   year=2023
-}
+Além da extensa diversidade de tipos de dados mencionada anteriormente, o `duckdb` também oferece suporte a tipos de dados aninhados. Esses tipos aninhados viabilizam uma estruturação mais sofisticada dos dados, proporcionando uma estrutura de armazenamento mais complexa.
 
+Os tipos suportados são `list`, `struct` e `map`. É observado que no R existe uma perfeita compatibilidade destes tipos.
+
+Primeiro é criada uma tabela chamada `NEST` com as variáveis:
+
+- `int_list`, com o tipo lista (`[]`) de inteiros (`INT`)
+- `varchar_list`, com o tipo lista (`[]`) de caracteres (`VARCHAR`)
+- `struct`, do tipo struct (`STRUCT`) com duas variáveis `INT` e `VARCHAR`
+
+Em seguida é feito o `INSERT` de uma observação conforme os tipos que foram definidos na criação da tabela. Foram utilizadas as funções `DBI::dbSendStatement` para pré-definir uma instrução para o banco de dados e `DBI::dbBind` para efetivamente preencher a instrução com os dados que serão inseridos na tabela.
+
+Por último último a consulta mostra como são apresentados estes dados aninhados no R.
+
+```{r}
+#| label: nest
+
+con <- duckdb::dbConnect(duckdb::duckdb(), ":memory:")
+DBI::dbExecute(con, "CREATE TABLE NEST (int_list INT[], varchar_list VARCHAR[],
+  struct STRUCT(i INT, j VARCHAR))"
+)
+
+stmt <- DBI::dbSendStatement(con, "INSERT INTO NEST VALUES (?, ?, ?)")
+DBI::dbBind(stmt, list("[1, 2]", "['a', 'b']", "{'i': 5, 'j': 'c'}"))
+
+dplyr::tbl(con, "nest")
+duckdb::dbDisconnect(con, shutdown = TRUE)
 ```
 
-# Referências {#sec-referências}
+## Leitura e escrita de arquivos externos
+
+### `csv` e `parquet`
+
+Com o `duckdb` é possível fazer a leitura e escrita de arquivos em estruturas tabulares tradicionais `csv` e `parquet`.
+
+No exemplo abaixo utiliza-se a função `duckdb::duckdb_read_csv` para a leitura de um arquivo `csv` salvo no diretório `../data/nyc-taxi.csv` e criar uma tabela de nome `nyc-taxi` na base de dados.
+
+```{r}
+#| label: read-csv
+#| eval: false
+ 
+con <- duckdb::dbConnect(duckdb::duckdb(), "../data/nyc-taxi.duckdb")
+duckdb::duckdb_read_csv(con, "nyc-taxi", "../data/nyc-taxi.csv")
+```
+
+Em seguida, a partir da tabela (`nyc-taxi`) na base de dados foi exportado localmente um arquivo no formato `parquet`, utilizando a instrução `COPY`.
+
+```{r}
+#| label: export-parquet
+#| eval: false
+ 
+DBI::dbExecute(con, "COPY 'nyc-taxi' TO '../data/nyc-taxi.parquet' 
+  (FORMAT PARQUET);")
+duckdb::dbDisconnect(con, shutdown = TRUE)
+```
+
+Por último, temos a função `read_parquet` para leitura de arquivos locais no formato `parquet`.
+
+```{r}
+#| label: read-parquet
+#| eval: false
+
+con <- duckdb::dbConnect(duckdb::duckdb(), ":memory:")
+DBI::dbGetQuery(con, "SELECT * FROM read_parquet('../data/nyc-taxi.parquet') 
+  LIMIT 2;") |> 
+  dplyr::as_tibble()
+
+duckdb::dbDisconnect(con, shutdown = TRUE)
+```
+
+```
+# A tibble: 2 × 11
+  id        vendor_id pickup_datetime     dropoff_datetime    passenger_count
+  <chr>         <int> <chr>               <chr>                         <int>
+1 id2875421         2 2016-03-14 17:24:55 2016-03-14 17:32:30               1
+2 id2377394         1 2016-06-12 00:43:35 2016-06-12 00:54:38               1
+# ℹ 6 more variables: pickup_longitude <dbl>, pickup_latitude <dbl>,
+#   dropoff_longitude <dbl>, dropoff_latitude <dbl>, store_and_fwd_flag <chr>,
+#   trip_duration <int>
+```
+
+### `json`
+
+O `duckdb` é um sistema de gerenciamento de banco de dados relacional que não apenas suporta a leitura de dados tabulares convencionais, mas também é capaz de processar arquivos `json`. Com isso, você pode diretamente lidar com dados não estruturados por meio do `duckdb`.
+
+A seguir um exemplo de arquivo no formato `json`.
+
+```
+[
+  {"Name" : "Mario", "Age" : 32, "Occupation" : "Plumber"}, 
+  {"Name" : "Peach", "Age" : 21, "Occupation" : "Princess"},
+  {},
+  {"Name" : "Bowser", "Occupation" : "Koopa"}
+]
+```
+
+Para leitura do arquivo é criada uma conexão, instalada e carregada a extensão para manipução dos arquivos `json`.
+
+```{r}
+#| label: json
+#| eval: false
+
+con <- duckdb::dbConnect(duckdb::duckdb(), ":memory:")
+DBI::dbExecute(con, "INSTALL json;")
+DBI::dbExecute(con, "LOAD json;")
+```
+
+Incorporando a função `read_json_auto` na consulta através da função `DBI::dbGetQuery`, o resultado da leitura do arquivo é apresentado como um `data.frame`.
+
+```{r}
+#| eval: false
+
+DBI::dbGetQuery(con, "SELECT * FROM read_json_auto('../data/example.json')")
+duckdb::dbDisconnect(con, shutdown = TRUE)
+```
+
+É observado no resultado que cada linha do `data.frame` é um documento do arquivo `json` original.
+
+```
+    Name Age Occupation
+1  Mario  32    Plumber
+2  Peach  21   Princess
+3   <NA>  NA       <NA>
+4 Bowser  NA      Koopa
+```
+
+## Funções
+
+# Casos de uso
+
+## Text mining
+
+## Dados de COVID 19
+
+## Lendo dados do S3
+
+## Análise de dados espaciais
+
+## Um banco embarcado em uma API
