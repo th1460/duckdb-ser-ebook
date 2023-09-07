@@ -1,14 +1,14 @@
 ---
-title: R E DUCKDB
+title: USO DO DUCKDB COM R
 lang: pt
 style: justify
 number-sections: true
 authors:
   - name: Thiago de Oliveira Pires
-    address: CIO, International Business Machines Corporation
+    address: F&O, CIO, International Business Machines Corporation
     email: thop100@hotmail.com
 abstract: |
-  Muitos já tiveram o problema, principalmente relacionado a memória da computador, quando tentam ler e manipular uma base de dados muito grande. Existem várias soluções para lidar com grandes bases de dados, mas uma tem chamado bastante atenção atualmente: `duckdb`. O `duckdb` é um banco de dados simples de operar, por ser um banco de dados embarcado/embutido no estilo SQLIte. Contudo, diferentemente do SQLite, o `duckdb` tem suporte para mais de 20 tipos de variáveis. E alguns destes tipos são aninhados como lista, estrutura e *map*. Pode se fazer consultas em arquivos csv e parquet diretamente. Consultas até em arquivos online salvos em um serviço de armazenamento na núvem (e.g. S3). Tem suporte também para consultas em arquivo json. Além de toda sintaxe padrão do SQL, ele tem algumas funções adicionais e suporta até a sintaxe de list comprehention do python. Este capĩtulo irá apresentar alguns recursos do `duckdb` e sua interação com a linguagem R.
+  Muitos já tiveram o problema, principalmente relacionado a memória da computador, quando tentam ler e manipular uma base de dados muito grande. Existem várias soluções para lidar com grandes bases de dados, mas uma tem chamado bastante atenção atualmente: `duckdb`. O `duckdb` é um banco de dados simples de operar, por ser um banco de dados embarcado/embutido no estilo SQLite. Contudo, diferentemente do SQLite, o `duckdb` tem suporte para mais de 20 tipos de variáveis. E alguns destes tipos são aninhados como lista, estrutura e *map*. Pode se fazer consultas em arquivos csv e parquet diretamente. Consultas até em arquivos online salvos em um serviço de armazenamento na núvem (e.g. S3). Tem suporte também para consultas em arquivo json. Além de toda sintaxe padrão do SQL, ele tem algumas funções adicionais e suporta até a sintaxe de list comprehention do python. Este capĩtulo irá apresentar alguns recursos do `duckdb` e sua interação com a linguagem R.
   
   Palavras Chave: duckdb; SQL; R; banco de dados.
 format: pdf
@@ -24,9 +24,11 @@ Outra vantagem do `duckdb` é a sua capacidade de compressão de dados. Ele util
 
 Existem várias *API wrappers* em outras linguagens além de C++ que poderão interagir com o `duckdb`. Além disso, é possível rodar o `duckdb` no próprio *browser* utilizando uma versão compilada em Web Assembly.
 
+Todas estas caractéristicas aliada a facilidade de instalação tornam o `duckdb` uma ferramenta bastante robusta para a análise de grandes bases de dados.
+
 # Simplicidade
 
-Para usar o `duckdb` no R é bastante fácil, tendo uma instação bem simples como vemos à seguir: 
+Para usar o `duckdb` no `R` é bastante fácil, tendo uma instação bem simples como vemos à seguir: 
 
 ```{r}
 #| label: setup
@@ -49,9 +51,9 @@ A versão estável utilizada neste capítulo foi a `r packageVersion("duckdb")`.
 
 # Velocidade
 
-Nesta seção, vamos investigar a impressionante velocidade do `duckdb` na análise de dados. Para ilustrar esse desempenho, faremos uso de um conjunto de dados que registra a duração de viagens de táxi na cidade de Nova York. Esses dados foram obtidos a partir da plataforma Kaggle e estão disponíveis no formato CSV através do link <https://www.kaggle.com/competitions/nyc-taxi-trip-duration/data>. O conjunto de dados compreende cerca de 1.5 milhões de registros de viagens com o arquivo tendo o tamanho de 191Mb.
+Nesta seção, vamos investigar a impressionante velocidade do `duckdb` na análise de dados. Para ilustrar esse desempenho, faremos uso de um conjunto de dados que registra a duração de viagens de táxi na cidade de New York. Esses dados foram obtidos a partir da plataforma Kaggle e estão disponíveis no formato `csv` através do link <https://www.kaggle.com/competitions/nyc-taxi-trip-duration/data>. O conjunto de dados compreende cerca de 1.5 milhões de registros de viagens com o arquivo tendo o tamanho de 191Mb.
 
-Utilizando apenas o `r-base` e o pacote `dplyr` o tempo foi de aproximandamente 22 seg.
+Utilizando apenas o `r-base` e o pacote `dplyr` para criar uma variável com os meses, aplicar um `group_by` e um `summarise` para calcular a média, o tempo foi de aproximandamente 22 seg.
 
 ```{r}
 #| label: speed-r-base
@@ -70,7 +72,7 @@ usuário   sistema decorrido
  14.323     6.096    21.711 
 ```
 
-Contudo, utilizando o `duckdb` o tempo de execução da leitura dados e consulta foi um pouco maior do que 2 seg.
+Contudo, utilizando o `duckdb`, aplicando a mesma análise, o tempo de execução da leitura dados e consulta foi um pouco maior do que 2 seg somente.
 
 ```{r}
 #| label: speed-duckdb
@@ -114,7 +116,7 @@ O resultado é a média de duração de viagens por mês:
 
 ## Tipos de dados
 
-No `duckdb` há mais de 20 tipos de dados suportados. A lista completa pode ser consultada neste link <https://duckdb.org/docs/sql/data_types/overview>. A seguir pode ser observado alguns dados que foram salvos em alguns tipos no `duckdb` e como os tipos foram preservados ao se fazer a consulta na tabela `dplyr::tbl(con, "examples")`. Uma observação interessante é do tipo `factor` no R, e como ele persiste na tabela do `duckdb` como `enum`.
+No `duckdb` há mais de 20 tipos de dados suportados. A lista completa pode ser consultada neste link <https://duckdb.org/docs/sql/data_types/overview>. A seguir poderá ser observado alguns dados que foram salvos em alguns tipos no `duckdb` e como os tipos foram preservados ao se fazer a consulta na tabela `dplyr::tbl(con, "examples")`. Uma observação interessante é do tipo `factor` no `R`, e como ele persiste na tabela do `duckdb` como `enum`. Contudo, se esta tabela for lida novamente no `R`, o tipo `factor` permanece.
 
 ```{r}
 #| label: data-types
@@ -152,7 +154,7 @@ Primeiro é criada uma tabela chamada `NEST` com as variáveis:
 
 Em seguida é feito o `INSERT` de uma observação conforme os tipos que foram definidos na criação da tabela. Foram utilizadas as funções `DBI::dbSendStatement` para pré-definir uma instrução para o banco de dados e `DBI::dbBind` para efetivamente preencher a instrução com os dados que serão inseridos na tabela.
 
-Por último último a consulta mostra como são apresentados estes dados aninhados no R.
+Por último a consulta mostra como são apresentados estes dados aninhados no `R`.
 
 ```{r}
 #| label: nest
@@ -185,7 +187,7 @@ con <- duckdb::dbConnect(duckdb::duckdb(), "../data/nyc-taxi.duckdb")
 duckdb::duckdb_read_csv(con, "nyc-taxi", "../data/nyc-taxi.csv")
 ```
 
-Em seguida, a partir da tabela (`nyc-taxi`) na base de dados foi exportado localmente um arquivo no formato `parquet`, utilizando a instrução `COPY`.
+Em seguida, a partir da tabela `nyc-taxi` na base de dados foi exportado localmente um arquivo no formato `parquet`, utilizando a instrução `COPY`.
 
 ```{r}
 #| label: export-parquet
@@ -268,14 +270,374 @@ duckdb::dbDisconnect(con, shutdown = TRUE)
 
 ## Funções
 
+Existem inúmeras funções à disposição para uso no `duckdb`. Ao trabalhar com dados em um banco deste sistema, utilizar suas funções internas pode oferecer um desempenho muito superior na consulta.
+
+No exemplo a seguir foi criado uma tabela chamada `functions` com duas variáveis `telefone` e `start_date`. Na consulta à esta tabela é aplicado um regex para extrair somente os números de um texto. Observa-se que a função `regexp_extract` do `duckdb` é chamada dentro da função `dplyr::sql` e dentro de um `dplyr::mutate` ou no caso aqui `dplyr::transmute`. No segundo caso temos uma função que irá contabilizar o número de semanas entre duas datas (`datediff`) e no último caso temos uma função que irá trazer o valor de `pi`.
+
+```{r}
+#| label: functions
+df <- data.frame(telefone = c("Meu telefone é: 21991831234"),
+                 start_date = c("1984-10-19") |> as.Date())
+
+con <- duckdb::dbConnect(duckdb::duckdb(), ":memory:")
+
+# Registra o df como uma tabela virtual (view)
+duckdb::duckdb_register(con, "functions", df) 
+
+dplyr::tbl(con, "functions") |>
+  dplyr::transmute(tel_extract = dplyr::sql("regexp_extract(telefone, '[0-9]+')"),
+                   weeks = dplyr::sql("datediff('week', start_date, today())"),
+                   pi = dplyr::sql("pi()"))
+
+duckdb::dbDisconnect(con, shutdown = TRUE)
+```
+
 # Casos de uso
 
-## Text mining
+Nesta seção iremos mostrar alguns exemplos de utilização do `duckdb`.
 
-## Dados de COVID 19
+## Mineração de texto
 
-## Lendo dados do S3
+Neste primeiro exemplo será mostrado como pode ser aplicada várias funções do `duckdb` para manipulação de texto.
+
+No primeiro trecho do código é feita a leitura dos textos que irão ser manipulados e salvo no objeto `bible`.
+
+```{r}
+bible <- readr::read_lines(
+  url("https://www.o-bible.com/download/kjv.txt"), 
+  skip = 1
+  ) |> dplyr::as_tibble()
+```
+
+A seguir é criada uma conexão com uma base de dados e uma tabela com o nome `bible`. Esta tabela criada foi uma tabela virtual, onde os dados não são armazenados fisicamente, ou seja, os dados persistem somente enquanto a conexão com o banco permanece ativa. A criação de tabelas virtuais é feita com a função `duckdb::duckdb_register`.
+
+```{r}
+con <- duckdb::dbConnect(duckdb::duckdb(), ":memory:")
+duckdb::duckdb_register(con, "bible", bible)
+```
+
+A tabela denominada `bible` pode ser visualizada abaixo:
+
+```{r}
+dplyr::tbl(con, "bible")
+```
+
+Cada linha da tabela é um versículo da bíblia e em cada início do texto há uma **referência** em que as duas primeiras letras representam o livro, o número antes dos ':' representa o capítulo e os últimos números (após os ':') representam o versículo.
+
+No próximo bloco de códigos são aplicadas um conjunto de funções para a manipulação dos textos:
+
+- `regexp_extract` faz a extração do livro (salvo com o nome `book`), ou seja, somente a parte de texto da referência.
+- `regexp_replace` faz uma limpeza e padronização do texto ao substituir a referência do texto (`\\w+\\d+\\:\\d+`, e.g. Ge1:1) ou (`|`) pontuações (`\\;|\\,|\\.|\\:`) por vazio (`''`). Foi aplicada a função `trim` para tirar os espaços das extremidades do texto e por último foi aplicada a função `lcase` para por o texto em caixa baixa.
+- `regexp_split_to_array` transforma o texto em uma lista de palavras, utilizando o espaço (`\\s`) entre as palavras como o ponto de corte.
+- `list_filter` filtra a lista de palavras que não correspondem (`regexp_matches`) com *in*, *the* e *and*.
+
+```{r}
+(words <- dplyr::tbl(con, "bible") |>
+  dplyr::mutate(book = dplyr::sql("regexp_extract(regexp_extract(value, 
+                '\\w+\\d+\\:\\d+'), '[A-Za-z]+')"),
+                text = dplyr::sql("lcase(trim(regexp_replace(value, 
+                '\\w+\\d+\\:\\d+|\\;|\\,|\\.|\\:', '', 'g')))"),
+                word = dplyr::sql("regexp_split_to_array(text, '\\s')"),
+                word_clean = dplyr::sql("list_filter(word, x -> NOT 
+                regexp_matches(x, 'in|the|and'))")) |>
+  dplyr::select(book, text, word, word_clean) |> head(1) |> dplyr::as_tibble())
+```
+
+O resultado da primeira observação pode ser visto com a consulta acima. E abaixo vemos como ficaram estruturadas as variáveis `word` e `word_clean` após a consulta.
+
+```{r}
+words$word
+words$word_clean
+duckdb::dbDisconnect(con, shutdown = TRUE)
+```
+
+## Dados de COVID-19
+
+Neste próximo exemplo será mostrado como trabalhar com dados de COVID-19.
+
+Os dados contidos no link (`url`) abaixo provêm do repositório da John Hopkins University e abrangem informações relacionadas à pandemia de COVID-19. Esta fonte compila e disponibiliza os dados atualizados de todo o mundo.
+
+Abaixo vemos que os dados contém as informações:
+
+- `Province.State`
+- `Country.Region`
+- `Lat` e `Long`
+- Diversas colunas com o padrão mês, dia e ano (`XMM.DD.AA`) tendo o valor acumulado de casos
+
+```{r}
+url <- paste0(
+  "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/",
+  "csse_covid_19_data/csse_covid_19_time_series/",
+  "time_series_covid19_confirmed_global.csv"
+  )
+
+read.csv(url, stringsAsFactors = FALSE) |>
+  dplyr::as_tibble()
+```
+
+Para a manipulação destes dados criaremos uma conexão e uma tabela virtual com o nome de `"covid19"`.
+
+```{r}
+#| eval: false
+con <- duckdb::dbConnect(duckdb::duckdb(), ":memory:")
+duckdb::duckdb_register(con, "covid19", read.csv(url, stringsAsFactors = FALSE)) 
+```
+
+Em seguida utilizamos a instrução `PIVOT_LONGER` a fim de mudar a orientação da tabela de *wide* para *long*. Sendo que a principal alteração será agrupar o conteúdo que estão distribuídos em várias colunas separadas para apenas uma coluna com os valores e uma outra coluna com as datas. O argumento `ON` com a função `COLUMNS('X')` declara quais são as colunas que deverão ser transformadas e os argumentos `NAME date` e `VALUE cumulate` declaram a construção das novas colunas que irão receber o novo dado estruturado.
+
+- `replace` irá substituir o valor `'X'` por `''` e a função `strptime` transforma o dado do tipo `VARCHAR` para o tipo `DATE` seguindo o padrão da data `'%m.%d.%y'`.
+- É construída uma variável `value` que é o valor acumulado - o valor do dia anterior (`dplyr::lag(cumulate)`), assim criamos uma variável com o valor exato do dia.
+- É aplicado um filtro `date > "2020-02-23"`.
+- A função `head` equivale a declaração `LIMIT` no SQL. 
+
+```{r}
+#| eval: false
+dplyr::tbl(con, dplyr::sql("(PIVOT_LONGER covid19 ON COLUMNS('X') 
+  INTO NAME date VALUE cumulate)")) |>
+  dplyr::select(country = Country.Region, date, cumulate) |>
+  dplyr::mutate(date = dplyr::sql("strptime(replace(date, 'X', ''), '%m.%d.%y')"),
+                value = cumulate - dplyr::lag(cumulate)) |>
+  dplyr::filter(date > "2020-02-23") |> head(3)
+```
+
+```
+# Source:   SQL [3 x 4]
+# Database: DuckDB 0.7.2-dev2706 [root@Darwin 22.4.0:R 4.2.3/:memory:]
+  country     date                cumulate value
+  <chr>       <dttm>                 <int> <int>
+1 Afghanistan 2020-02-24 00:00:00        5     5
+2 Afghanistan 2020-02-25 00:00:00        5     0
+3 Afghanistan 2020-02-26 00:00:00        5     0
+```
+
+Para utilizar a declaração `PIVOT_LONGER` foi necessário instalar a versão `0.8.0` do pacote em desenvolvimento do `duckdb`.
+
+## Lendo dados de um serviço de armazenamento na núvem
+
+Com o `duckdb` é possível ler arquivos remotos armazenados em um recurso na núvem. O exemplo que utilizaremos aqui é do tabela com as viagens de taxi de New York, em um arquivo de formato `parquet` hospedado em um *Cloud Object Storage (COS)* da IBM.
+
+Primeiro é criada uma conexão em memória e nesta conexão é intalado e carregado a extensão `httpfs`.
+
+```{r}
+#| eval: false
+
+con <- duckdb::dbConnect(duckdb::duckdb(), ":memory:")
+DBI::dbExecute(con, "INSTALL httpfs;") 
+DBI::dbExecute(con, "LOAD httpfs;") 
+```
+
+Em seguida são declaradas as informações do serviço onde está hospedado o arquivo no qual se quer consultar.
+
+```{r}
+#| eval: false
+
+library(glue)
+
+s3_region <- Sys.getenv('S3_REGION')
+s3_endpoint <- Sys.getenv('S3_ENDPOINT')
+s3_access_key_id <- Sys.getenv('S3_ACCESS_KEY_ID')
+s3_secret_access_key <- Sys.getenv('S3_SECRET_ACCESS_KEY')
+
+DBI::dbExecute(con, glue("SET s3_region='{s3_region}';"))
+DBI::dbExecute(con, glue("SET s3_endpoint='{s3_endpoint}';"))
+DBI::dbExecute(con, glue("SET s3_access_key_id='{s3_access_key_id}';"))
+DBI::dbExecute(con, glue("SET s3_secret_access_key='{s3_secret_access_key}';"))
+```
+
+As variáveis de ambiente são especificadas da seguinte forma:
+
+```
+S3_REGION=us-south
+S3_ENDPOINT=s3.us-south.cloud-object-storage.appdomain.cloud
+S3_ACCESS_KEY_ID=<s3_access_key_id>
+S3_SECRET_ACCESS_KEY=<s3_secret_access_key>
+```
+
+Elas podem ser salvas em um arquivo `.Renviron` e lidas com a função `readRenviron()`.
+
+Finalmente a tabela poderá ser consultada diretamente de onde ela está armazenada.
+
+```{r}
+#| eval: false
+
+dplyr::tbl(con, "s3://duckdb-ser/nyc-taxi.parquet")
+```
+
+```
+# Source:   table<s3://duckdb-ser/nyc-taxi.parquet> [?? x 11]
+# Database: DuckDB 0.7.1 [root@Darwin 22.4.0:R 4.2.3/:memory:]
+   id        vendor_id pickup_datetime     dropoff_datetime    passenger_count
+   <chr>         <int> <chr>               <chr>                         <int>
+ 1 id2875421         2 2016-03-14 17:24:55 2016-03-14 17:32:30               1
+ 2 id2377394         1 2016-06-12 00:43:35 2016-06-12 00:54:38               1
+ 3 id3858529         2 2016-01-19 11:35:24 2016-01-19 12:10:48               1
+ 4 id3504673         2 2016-04-06 19:32:31 2016-04-06 19:39:40               1
+ 5 id2181028         2 2016-03-26 13:30:55 2016-03-26 13:38:10               1
+ 6 id0801584         2 2016-01-30 22:01:40 2016-01-30 22:09:03               6
+ 7 id1813257         1 2016-06-17 22:34:59 2016-06-17 22:40:40               4
+ 8 id1324603         2 2016-05-21 07:54:58 2016-05-21 08:20:49               1
+ 9 id1301050         1 2016-05-27 23:12:23 2016-05-27 23:16:38               1
+10 id0012891         2 2016-03-10 21:45:01 2016-03-10 22:05:26               1
+# ℹ more rows
+# ℹ 6 more variables: pickup_longitude <dbl>, pickup_latitude <dbl>,
+#   dropoff_longitude <dbl>, dropoff_latitude <dbl>, store_and_fwd_flag <chr>,
+#   trip_duration <int>
+```
 
 ## Análise de dados espaciais
 
+Com o `duckdb` também é possível analisar dados espaciais através da extensão `spatial`.
+
+Primeiro é criada uma conexão em memória e nesta conexão é intalado e carregado a extensão `spatial`.
+
+```{r}
+#| eval: false
+
+con <- duckdb::dbConnect(duckdb::duckdb(), ":memory:")
+DBI::dbExecute(con, "INSTALL httpfs;") 
+DBI::dbExecute(con, "LOAD httpfs;") 
+```
+
+Será lido novamente os dados do COS como mostrado na seção anterior e em seguida na consulta será aplicado um conjunto de funções para análise espacial.
+
+```{r}
+#| eval: false
+
+nyc_taxi_spatial <- dplyr::tbl(con, "s3://duckdb-ser/nyc-taxi.parquet") |>
+  dplyr::mutate(
+    pickup_point = dplyr::sql("ST_Transform(ST_Point(pickup_latitude, 
+      pickup_longitude), 'EPSG:4326', 'ESRI:102718')"),
+    dropoff_point = dplyr::sql("ST_Transform(ST_Point(dropoff_latitude,     
+      dropoff_longitude), 'EPSG:4326', 'ESRI:102718')"),
+    aerial_distance = dplyr::sql("ST_Distance(pickup_point, dropoff_point)/3280.84")
+  ) |> dplyr::as_tibble()
+```
+
+- `ST_Point` recebe como input as geolocalizações
+- `ST_Trasform` faz a conversão das coordenadas geográficas de latitude e longitude, que utilizam o sistema "WGS84" (`EPSG:4326`), em coordenadas de projeção específicas para a região de Nova York, denominadas "NAD83 / New York Long Island ftUS" (`ESRI:102718`). Essa transformação é útil ao lidar com dados geoespaciais relacionados à área de Nova York e é necessária para assegurar uma representação precisa das coordenadas nessa região, minimizando a distorção
+- `ST_Distance` calcula a distância em linha reta entre o ponto de embarque e o ponto de desembarque. A razão entre a distância e o valor 3280.84 é um ajuste para apresentar o valor em Km.
+
+Abaixo vemos apenas um ajuste na apresentação dos resultados e a tabela com as informações extraídas e calculada.
+```{r}
+#| eval: false
+
+nyc_taxi_spatial |> 
+  dplyr::select(pickup_longitude, pickup_latitude, 
+                dropoff_longitude, dropoff_latitude, 
+                aerial_distance) |> 
+  dplyr::slice(1) |>
+  tidyr::pivot_longer(tidyr::everything()) |> 
+  dplyr::mutate(value = tibble::num(value, digits = 5))
+```
+
+```
+# A tibble: 5 × 2
+  name                  value
+  <chr>             <num:.5!>
+1 pickup_longitude  -73.98215
+2 pickup_latitude    40.76794
+3 dropoff_longitude -73.96463
+4 dropoff_latitude   40.76560
+5 aerial_distance     1.50216
+```
+
+A seguir vemos o mapa com os pontos de embarque e desembarque, ligados por uma linha reta representando a distância que foi calculada.
+
+![Pontos de embarque e desembarque](aerial_distance.png)
+
 ## Um banco embarcado em uma API
+
+O `duckdb` é um banco de dados embarcado, o que significa que ele é projetado para ser incorporado diretamente em aplicativos ou sistemas, em vez de ser executado como um serviço separado em um servidor por exemplo.
+
+Nesse exemplo será mostrado como incorporar o `duckdb` em uma API construída com `plumber`.
+
+A API é estruturada em uma função no arquivo `api.R`. Esta função irá consultar uma tabela no formato `parquet` que está hospedada no COS. A função tem um argumento `input` e receberá um `id` para filtrar as informações de uma viagem de taxi.
+
+```{r}
+#| eval: false
+
+#* @apiTitle Mostrar informações segundo ID
+
+#* @param input
+#* @get /info
+function(input) {
+  # Ler variáveis de ambiente
+  readRenviron(".Renviron")
+
+  s3_region <- Sys.getenv("S3_REGION")
+  s3_endpoint <- Sys.getenv("S3_ENDPOINT")
+  s3_access_key_id <- Sys.getenv("S3_ACCESS_KEY_ID")
+  s3_secret_access_key <- Sys.getenv("S3_SECRET_ACCESS_KEY")
+
+  # Criar conexão com o banco
+  con <- duckdb::dbConnect(duckdb::duckdb(), ":memory:")
+  invisible(DBI::dbExecute(con, "INSTALL httpfs;"))
+  invisible(DBI::dbExecute(con, "LOAD httpfs;"))
+  invisible(DBI::dbExecute(
+    con,
+    glue::glue("SET s3_region='{s3_region}';")
+  ))
+  invisible(DBI::dbExecute(
+    con,
+    glue::glue("SET s3_endpoint='{s3_endpoint}';")
+  ))
+  invisible(DBI::dbExecute(
+    con,
+    glue::glue("SET s3_access_key_id='{s3_access_key_id}';")
+  ))
+  invisible(DBI::dbExecute(
+    con,
+    glue::glue("SET s3_secret_access_key='{s3_secret_access_key}';")
+  ))
+
+  # Consulta
+  resposta <- dplyr::tbl(con, "s3://duckdb-ser/nyc-taxi.parquet") |>
+    dplyr::filter(id == input) |>
+    dplyr::as_tibble() |>
+    as.data.frame()
+
+  duckdb::dbDisconnect(con, shutdown = TRUE)
+
+  # Resultado
+  return(resposta)
+}
+```
+
+Para iniciar a API deve ser executado o comando abaixo, onde é informado o nome do script e a porta em que a API estará disponível:
+
+```{r}
+#| eval: false
+
+plumber::pr("api.R") |> 
+  plumber::pr_run(port=8010)
+```
+
+Para fazer a requisição na API podemos usar o pacote `httr`. No exemplo a API roda localmente `http://127.0.0.1` na porta `8010` e foi requisitada as informações da viagem com o `id` de `id2875421`.
+
+```{r}
+#| eval: false
+
+httr::GET("http://127.0.0.1:8010/info?input=id2875421") |> 
+  httr::content() |> 
+  jsonlite::toJSON(auto_unbox = TRUE, pretty = TRUE)
+```
+
+No resultado observa-se as informações da viagem segundo o `id` informado:
+
+```
+[
+  {
+    "id": "id2875421",
+    "vendor_id": 2,
+    "pickup_datetime": "2016-03-14 17:24:55",
+    "dropoff_datetime": "2016-03-14 17:32:30",
+    "passenger_count": 1,
+    "pickup_longitude": -73.9822,
+    "pickup_latitude": 40.7679,
+    "dropoff_longitude": -73.9646,
+    "dropoff_latitude": 40.7656,
+    "store_and_fwd_flag": "N",
+    "trip_duration": 455
+  }
+] 
+```
