@@ -154,7 +154,7 @@ Primeiro é criada uma tabela chamada `NEST` com as variáveis:
 
 Em seguida é feito o `INSERT` de uma observação conforme os tipos que foram definidos na criação da tabela. Foram utilizadas as funções `DBI::dbSendStatement` para pré-definir uma instrução para o banco de dados e `DBI::dbBind` para efetivamente preencher a instrução com os dados que serão inseridos na tabela.
 
-Por último a consulta mostra como são apresentados estes dados aninhados no `R`.
+Por último a consulta mostra como são apresentados estes dados aninhados no `R`. Após o `DBI::dbExecute` sempre é mostrado o número de observações afetadas na tabela, como foi feita a criação de uma tabela, nenhuma observação foi alterada.
 
 ```{r}
 #| label: nest
@@ -541,9 +541,9 @@ nyc_taxi_spatial |>
 5 aerial_distance     1.50216
 ```
 
-A seguir vemos o mapa com os pontos de embarque e desembarque, ligados por uma linha reta representando a distância que foi calculada.
+Na @fig-map vemos o mapa com os pontos de embarque e desembarque, ligados por uma linha reta representando a distância que foi calculada.
 
-![Pontos de embarque e desembarque](aerial_distance.png)
+![Pontos de embarque e desembarque](aerial_distance.png){#fig-map}
 
 ## Um banco embarcado em uma API
 
