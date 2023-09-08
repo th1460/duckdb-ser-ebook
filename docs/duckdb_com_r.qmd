@@ -24,9 +24,20 @@ Outra vantagem do `duckdb` é a sua capacidade de compressão de dados. Ele util
 
 Existem várias *API wrappers* em outras linguagens além de C++ que poderão interagir com o `duckdb`. Além disso, é possível rodar o `duckdb` no próprio *browser* utilizando uma versão compilada em Web Assembly.
 
-Todas estas caractéristicas aliada a facilidade de instalação tornam o `duckdb` uma ferramenta bastante robusta para a análise de grandes bases de dados.
+Todas estas caracteristicas aliada a facilidade de instalação tornam o `duckdb` uma ferramenta bastante robusta para a análise de grandes bases de dados.
 
-# Simplicidade
+# Objetivo
+
+Este capítulo tem o objetivo de mostrar como podemos usar o `duckdb` com a linguagem `R`. Discutiremos nas seções seguintes alguns tópicos como:
+
+- Simplicidade
+- Velocidade
+- Recursos
+- Casos de uso
+
+# Aplicação
+
+## Simplicidade
 
 Para usar o `duckdb` no `R` é bastante fácil, tendo uma instação bem simples como vemos à seguir: 
 
@@ -49,7 +60,7 @@ install.packages('duckdb', repos=c('https://duckdb.r-universe.dev',
 
 A versão estável utilizada neste capítulo foi a `r packageVersion("duckdb")`.
 
-# Velocidade
+## Velocidade
 
 Nesta seção, vamos investigar a impressionante velocidade do `duckdb` na análise de dados. Para ilustrar esse desempenho, faremos uso de um conjunto de dados que registra a duração de viagens de táxi na cidade de New York. Esses dados foram obtidos a partir da plataforma Kaggle e estão disponíveis no formato `csv` através do link <https://www.kaggle.com/competitions/nyc-taxi-trip-duration/data>. O conjunto de dados compreende cerca de 1.5 milhões de registros de viagens com o arquivo tendo o tamanho de 191Mb.
 
@@ -112,9 +123,9 @@ O resultado é a média de duração de viagens por mês:
 7     7       9484.
 ```
 
-# Recursos
+## Recursos
 
-## Tipos de dados
+### Tipos de dados
 
 No `duckdb` há mais de 20 tipos de dados suportados. A lista completa pode ser consultada neste link <https://duckdb.org/docs/sql/data_types/overview>. A seguir poderá ser observado alguns dados que foram salvos em alguns tipos no `duckdb` e como os tipos foram preservados ao se fazer a consulta na tabela `dplyr::tbl(con, "examples")`. Uma observação interessante é do tipo `factor` no `R`, e como ele persiste na tabela do `duckdb` como `enum`. Contudo, se esta tabela for lida novamente no `R`, o tipo `factor` permanece.
 
@@ -140,7 +151,7 @@ dplyr::tbl(con, "examples")
 duckdb::dbDisconnect(con, shutdown = TRUE)
 ```
 
-## Tipos de dados aninhados
+### Tipos de dados aninhados
 
 Além da extensa diversidade de tipos de dados mencionada anteriormente, o `duckdb` também oferece suporte a tipos de dados aninhados. Esses tipos aninhados viabilizam uma estruturação mais sofisticada dos dados, proporcionando uma estrutura de armazenamento mais complexa.
 
@@ -171,9 +182,9 @@ dplyr::tbl(con, "nest")
 duckdb::dbDisconnect(con, shutdown = TRUE)
 ```
 
-## Leitura e escrita de arquivos externos
+### Leitura e escrita de arquivos externos
 
-### `csv` e `parquet`
+#### `csv` e `parquet`
 
 Com o `duckdb` é possível fazer a leitura e escrita de arquivos em estruturas tabulares tradicionais `csv` e `parquet`.
 
@@ -223,7 +234,7 @@ duckdb::dbDisconnect(con, shutdown = TRUE)
 #   trip_duration <int>
 ```
 
-### `json`
+#### `json`
 
 O `duckdb` é um sistema de gerenciamento de banco de dados relacional que não apenas suporta a leitura de dados tabulares convencionais, mas também é capaz de processar arquivos `json`. Com isso, você pode diretamente lidar com dados não estruturados por meio do `duckdb`.
 
@@ -268,7 +279,7 @@ duckdb::dbDisconnect(con, shutdown = TRUE)
 4 Bowser  NA      Koopa
 ```
 
-## Funções
+### Funções
 
 Existem inúmeras funções à disposição para uso no `duckdb`. Ao trabalhar com dados em um banco deste sistema, utilizar suas funções internas pode oferecer um desempenho muito superior na consulta.
 
@@ -292,9 +303,9 @@ dplyr::tbl(con, "functions") |>
 duckdb::dbDisconnect(con, shutdown = TRUE)
 ```
 
-# Casos de uso
+# Resultados
 
-Nesta seção iremos mostrar alguns exemplos de utilização do `duckdb`.
+Nesta seção iremos mostrar alguns exemplos de casos de uso com o `duckdb`.
 
 ## Mineração de texto
 
@@ -641,3 +652,7 @@ No resultado observa-se as informações da viagem segundo o `id` informado:
   }
 ] 
 ```
+
+# Conclusão
+
+O `duckdb` se destaca como uma ferramenta altamente robusta para análise de grandes bases de dados devido à combinação de suas características únicas, facilidade de instalação, extensibilidade através de plugins, suporte à varios tipos de dados e inclusive à estruturas complexas aninhadas. Com um desempenho excepcional, suporte SQL e capacidade de processamento em grande escala, ele oferece uma solução eficaz e versátil para análise de dados.
