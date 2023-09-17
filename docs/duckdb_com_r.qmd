@@ -11,24 +11,25 @@ abstract: |
   Muitos já tiveram o problema, principalmente relacionado a memória da computador, quando tentam ler e manipular uma base de dados muito grande. Existem várias soluções para lidar com grandes bases de dados, mas uma tem chamado bastante atenção atualmente: `duckdb`. O `duckdb` é um banco de dados simples de operar, por ser um banco de dados embarcado/embutido no estilo SQLite. Contudo, diferentemente do SQLite, o `duckdb` tem suporte para mais de 20 tipos de variáveis. E alguns destes tipos são aninhados como lista, estrutura e *map*. Pode se fazer consultas em arquivos csv e parquet diretamente. Consultas até em arquivos online salvos em um serviço de armazenamento na núvem (e.g. S3). Tem suporte também para consultas em arquivo json. Além de toda sintaxe padrão do SQL, ele tem algumas funções adicionais e suporta até a sintaxe de list comprehention do python. Este capĩtulo irá apresentar alguns recursos do `duckdb` e sua interação com a linguagem R.
   
   Palavras Chave: duckdb; SQL; R; banco de dados.
+bibliography: References.bib
 format: pdf
 ---
 
 # Introdução
 
-O `duckdb` é um sistema de gerenciamento de banco de dados (SGBD) de código aberto (i.e. MIT), escrito em C++ e otimizado para consultas analíticas. Ele foi projetado para fornecer alta velocidade e eficiência em consultas complexas em grandes conjuntos de dados. 
+O `duckdb` é um sistema de gerenciamento de banco de dados (SGBD) de código aberto (i.e. MIT), escrito em C++ e otimizado para consultas analíticas. Ele foi projetado para fornecer alta velocidade e eficiência em consultas complexas em grandes conjuntos de dados [@duckdb].
 
-Existem duas características principais que distinguem o `duckdb` de outras ferramentas de análise de dados: a arquitetura colunar e o processamento vetorizado. A arquitetura colunar permite armazenar dados em colunas separadas, otimizando o acesso aos dados necessários para consultas específicas. Já o processamento vetorizado realiza operações em lotes, aproveitando as otimizações de hardware e reduzindo a latência de acesso à memória. Com isso se produz consultas mais rápidas e eficiêntes.
+Existem duas características principais que distinguem o `duckdb` de outras ferramentas de análise de dados: a arquitetura colunar e o processamento vetorizado. A arquitetura colunar permite armazenar dados em colunas separadas, otimizando o acesso aos dados necessários para consultas específicas. Já o processamento vetorizado realiza operações em lotes, aproveitando as otimizações de hardware e reduzindo a latência de acesso à memória. Com isso se produz consultas mais rápidas e eficiêntes [@raasveldt2019duckdb].
 
-Outra vantagem do `duckdb` é a sua capacidade de compressão de dados. Ele utiliza algoritmos de compressão especializados, resultando em economia de espaço em disco e também contribuindo com uma maior velocidade na consulta.
+Outra vantagem do `duckdb` é a sua capacidade de compressão de dados. Ele utiliza algoritmos de compressão especializados, resultando em economia de espaço em disco e também contribuindo com uma maior velocidade na consulta [@duckdbcompression].
 
-Existem várias *API wrappers* em outras linguagens além de C++ que poderão interagir com o `duckdb`. Além disso, é possível rodar o `duckdb` no próprio *browser* utilizando uma versão compilada em Web Assembly.
+Existem várias *API wrappers* em outras linguagens além de C++ que poderão interagir com o `duckdb`. Além disso, é possível rodar o `duckdb` no próprio *browser* utilizando uma versão compilada em Web Assembly [@duckdbwasm].
 
 Todas estas caracteristicas aliada a facilidade de instalação tornam o `duckdb` uma ferramenta bastante robusta para a análise de grandes bases de dados.
 
 # Objetivo
 
-Este capítulo tem o objetivo de mostrar como podemos usar o `duckdb` com a linguagem `R`. Discutiremos nas seções seguintes alguns tópicos como:
+Este capítulo tem o objetivo de mostrar como podemos usar o `duckdb` com a linguagem `R` [@rlang]. Discutiremos nas seções seguintes alguns tópicos como:
 
 - Simplicidade
 - Velocidade
@@ -497,7 +498,7 @@ dplyr::tbl(con, "s3://duckdb-ser/nyc-taxi.parquet")
 
 ## Análise de dados espaciais
 
-Com o `duckdb` também é possível analisar dados espaciais através da extensão `spatial`.
+Com o `duckdb` também é possível analisar dados espaciais através da extensão `spatial` [@duckdbspatial].
 
 Primeiro é criada uma conexão em memória e nesta conexão é intalado e carregado a extensão `spatial`.
 
@@ -560,7 +561,7 @@ Na @fig-map vemos o mapa com os pontos de embarque e desembarque, ligados por um
 
 O `duckdb` é um banco de dados embarcado, o que significa que ele é projetado para ser incorporado diretamente em aplicativos ou sistemas, em vez de ser executado como um serviço separado em um servidor por exemplo.
 
-Nesse exemplo será mostrado como incorporar o `duckdb` em uma API construída com `plumber`.
+Nesse exemplo será mostrado como incorporar o `duckdb` em uma API construída com `plumber` [@plumber].
 
 A API é estruturada em uma função no arquivo `api.R`. Esta função irá consultar uma tabela no formato `parquet` que está hospedada no COS. A função tem um argumento `input` e receberá um `id` para filtrar as informações de uma viagem de taxi.
 
@@ -656,3 +657,5 @@ No resultado observa-se as informações da viagem segundo o `id` informado:
 # Conclusão
 
 O `duckdb` se destaca como uma ferramenta altamente robusta para análise de grandes bases de dados devido à combinação de suas características únicas, facilidade de instalação, extensibilidade através de plugins, suporte à varios tipos de dados e inclusive à estruturas complexas aninhadas. Com um desempenho excepcional, suporte SQL e capacidade de processamento em grande escala, ele oferece uma solução eficaz e versátil para análise de dados.
+
+# Referências
